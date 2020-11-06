@@ -1,34 +1,86 @@
 #include <iostream>
+#include <string>
 
-#include <openssl/evp.h>
-#include <openssl/rsa.h>
-#include <openssl/pem.h>
-#include <unistd.h>
+#include "cryptopp/cryptlib.h"
+#include "cryptopp/dsa.h"
+#include "cryptopp/osrng.h"
+#include "cryptopp/hex.h"
+#include "cryptopp/files.h"
+#include "cryptopp/base64.h"
 
-void generate_rsa_keys()
+using namespace CryptoPP;
+void keyValidation(const std::string &encodedPrivateKey, const std::string &validationKey)
 {
-	EVP_PKEY_CTX  *ctx;
-	EVP_PKEY * pkey = nullptr;
-	ctx = EVP_PKEY_CTX_new_id(EVP_PKEY_RSA, nullptr);
-	if (!ctx)
-		std::cout<< "Error Occurred" <<std::endl;
-	if (EVP_PKEY_keygen_init(ctx) <= 0)
-		std::cout<< "init Error"<< std::endl;
-	if (EVP_PKEY_CTX_set_rsa_keygen_bits(ctx, 4096) <=0)
-		std::cout<< "Error in generating 2048 bits" <<std::endl;
+	if (validationKey == encodedPrivateKey) {
+		std::cout << "Decoded private key is the same as the encoded private key." << std::endl;
+	}
+	else {
+		std::cout << "Decoded private key is NOT the same as the encoded private key." << std::endl;
+	}
+}
+void generate_dsa()
+{
+	AutoSeededRandomPool rng;
+	DSA::PrivateKey privateKey;
+	privateKey.GenerateRandomWithKeySize(rng, 2048);
 
-	const auto status = EVP_PKEY_keygen(ctx, &pkey);
-	if (status<=0)
-		std::cout<< "Error generating key: "<<status<<std::endl;
-	FILE* fp = fopen("mykey.pem", "w+");
-	auto rval = PEM_write_PKCS8PrivateKey(fp, pkey, EVP_aes_128_cbc_hmac_sha256(), "none", 4, nullptr, nullptr);
-	std::cout<<rval<<std::endl;
-	fclose(fp);
+	DSA::PublicKey publicKey;
+	publicKey.AssignFrom(privateKey);
+	if (!privateKey.Validate(rng, 3) || !publicKey.Validate(rng, 3)) {
+		std::cout << "DSA Generation Failed" << std::endl;
+	}
+
+	std::cout << "Hex encoded private key: \n";
+	HexEncoder hex(new FileSink(std::cout));
+	privateKey.Save(hex);
+	std::cout << std::endl;
+
+	std::string encodedPrivateKey, encodedPublicKey;
+	privateKey.Save(StringSink(encodedPrivateKey).Ref());
+	publicKey.Save(StringSink(encodedPublicKey).Ref());
+	std::cout << "PKCS #8 Encoded public key: \n" << encodedPublicKey << std::endl;
+
+	DSA::PrivateKey decodedPrivateKey;
+	decodedPrivateKey.Load(StringStore(encodedPrivateKey).Ref());
+	std::string validationKey;
+	decodedPrivateKey.Save(StringSink(validationKey).Ref());
+	std::cout << "\n\n" << std::endl;
+	keyValidation(encodedPrivateKey, validationKey);
+
+
+	std::cout << "Base64 encoded private key: \n";
+	std::string base64EncodedString;
+	Base64Encoder base64Encoder(new StringSink(base64EncodedString));
+	privateKey.Save(base64Encoder);
+	std::cout << base64EncodedString << std::endl;
+
+	Base64Decoder base64Decoder;
+	base64Decoder.Put((byte *)base64EncodedString.data(), base64EncodedString.size());
+	base64Decoder.MessageEnd();
+
+	std::string base64DecodedString;
+
+	word64 size = base64Decoder.MaxRetrievable();
+	if (size && size <= SIZE_MAX) {
+		base64DecodedString.resize(size);
+		base64Decoder.Get((byte*)base64DecodedString.data(), base64DecodedString.size());
+		keyValidation(encodedPrivateKey, base64DecodedString);
+	}
+/*
+
+	DSA::PrivateKey decodedB64PrivateKey;
+	decodedB64PrivateKey.Load(base64Decoder);
+	std::string validationKeyString;
+	decodedB64PrivateKey.Save(StringSink(validationKeyString).Ref());
+
+	keyValidation(encodedPrivateKey, validationKeyString);
+*/
+
 }
 
 int main()
 {
 	std::cout << "Hello, World!" << std::endl;
-	generate_rsa_keys();
+	generate_dsa();
 	return 0;
 }
