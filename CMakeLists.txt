@@ -27,7 +27,7 @@ target_link_libraries(CryptoPG cryptopp)
 
 
 
-add_executable(cserver cryptopg_server.cpp cryptopg.grpc.pb.cc cryptopg.pb.cc)
+add_executable(cserver cryptopg_server.cpp cryptopg.grpc.pb.cc cryptopg.pb.cc KeyManager.cpp)
 target_link_libraries(cserver gRPC::grpc++)
 
 add_subdirectory(tests)
