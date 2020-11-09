@@ -3,6 +3,8 @@ project(CryptoPG)
 
 set(CMAKE_CXX_STANDARD 17)
 
+set(MYVAR random_variable)
+
 set(CMAKE_PREFIX_PATH /home/alfredd/.local/)
 include_directories(/home/alfredd/.local/include)
 link_directories(/home/alfredd/.local/lib)
@@ -30,7 +32,11 @@ target_link_libraries(CryptoPG cryptopp)
 add_executable(cserver cryptopg_server.cpp cryptopg.grpc.pb.cc cryptopg.pb.cc KeyManager.cpp)
 target_link_libraries(cserver gRPC::grpc++)
 
+add_executable(file_demo file_demo.cpp)
+
 add_subdirectory(tests)
+
+
 
 
 #[[
