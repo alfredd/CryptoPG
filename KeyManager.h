@@ -5,20 +5,23 @@
 #ifndef KEYMANAGER_H
 #define KEYMANAGER_H
 #include <string>
-
+#include "cryptopp/dsa.h"
 class KeyManager
 {
 public:
 	KeyManager();
-	~KeyManager();
+	virtual ~KeyManager();
 	char* sign(char* data, int len);
 	bool validate(char* signedData);
-	char* getPublicKey();
+	std::string getPublicKey();
 
 private:
 	void loadKeys();
 	const std::string PUBLIC_KEY_FILE_NAME = "Key.pub";
 	const std::string PRIVATE_KEY_FILE_NAME = "Key.priv";
+	void createNewPrivateKey();
+	CryptoPP::DSA::PrivateKey privateKey;
+	CryptoPP::DSA::PublicKey publicKey;
 };
 
 

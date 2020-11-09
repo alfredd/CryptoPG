@@ -26,6 +26,12 @@ add_subdirectory(${CMAKE_CURRENT_BINARY_DIR}/googletest-src
 #        ${CMAKE_CURRENT_BINARY_DIR}/googletest-build
 #        EXCLUDE_FROM_ALL)
 
+include_directories(${CMAKE_CURRENT_BINARY_DIR}/..)
+link_directories(${CMAKE_CURRENT_BINARY_DIR}/..)
+
 add_executable(sample_test sample_test.cpp)
 target_link_libraries(sample_test gtest_main)
 add_test(NAME test_demo COMMAND sample_test)
+add_executable(KeyManagerTest keymanager_test.cpp ../KeyManager.cpp)
+target_link_libraries(KeyManagerTest gtest_main cryptopp)
+add_test(NAME ProjectTests COMMAND KeyManagerTest)

@@ -30,7 +30,7 @@ target_link_libraries(CryptoPG cryptopp)
 
 
 add_executable(cserver cryptopg_server.cpp cryptopg.grpc.pb.cc cryptopg.pb.cc KeyManager.cpp)
-target_link_libraries(cserver gRPC::grpc++)
+target_link_libraries(cserver gRPC::grpc++ cryptopp)
 
 add_executable(file_demo file_demo.cpp)
 
