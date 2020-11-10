@@ -46,12 +46,6 @@ public:
 		return Status::OK;
 	}
 
-
-
-
-	virtual ~CryptoPGServiceImpl()
-	{
-	}
 };
 
 void RunServer()
