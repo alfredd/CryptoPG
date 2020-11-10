@@ -4,6 +4,7 @@
 
 #include "gtest/gtest.h"
 #include "../KeyManager.h"
+#include "../Verifier.hpp"
 #include <cstdio>
 
 TEST(KeyManager, Test1) {
@@ -33,4 +34,22 @@ TEST(KeyManager, Test3) {
 
 	cleanup_files();
 
+}
+
+TEST(DigitalSignature, Test4)
+{
+	cleanup_files();
+
+	KeyManager keyManager1;
+	std::string publicKey1 = keyManager1.getPublicKey();
+
+	std::string message = "Random Message";
+	std::string signedMessage = keyManager1.sign(message);
+
+	cryptopg::Verifier verifier;
+	bool result = verifier.verify(message,signedMessage, publicKey1);
+
+	EXPECT_TRUE(result);
+
+	cleanup_files();
 }

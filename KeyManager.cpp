@@ -8,6 +8,7 @@
 #include "cryptopp/files.h"
 
 #include "KeyManager.h"
+#include "Signer.hpp"
 
 #include <fstream>
 #include <iostream>
@@ -34,23 +35,29 @@ KeyManager::KeyManager()
 KeyManager::~KeyManager()
 {
 }
-char *KeyManager::sign(char *data, int len)
+std::string KeyManager::sign(std::string message)
 {
-	return nullptr;
+	cryptopg::Signer signer;
+	std::string signedMessage = signer.Sign(message, this->privateKey);
+
+	return signedMessage;
 }
-bool KeyManager::validate(char *signedData)
-{
-	return false;
-}
+
 std::string KeyManager::getPublicKey()
 {
 	std::string encodedPublicKey;
 	publicKey.Save(StringSink(encodedPublicKey).Ref());
 	return encodedPublicKey;
 }
-void KeyManager::loadKeys()
+void KeyManager::storeKeys()
 {
+	std::ofstream privateKeyFile(this->PRIVATE_KEY_FILE_NAME, std::ios::binary);
+	this->privateKey.Save(FileSink(privateKeyFile).Ref());
+	privateKeyFile.close();
 
+	std::ofstream publicKeyFile(this->PUBLIC_KEY_FILE_NAME, std::ios::binary);
+	this->publicKey.Save(FileSink(publicKeyFile).Ref());
+	publicKeyFile.close();
 }
 void KeyManager::createNewPrivateKey()
 {
@@ -66,11 +73,5 @@ void KeyManager::createNewPrivateKey()
 	this->privateKey = localPrivateKey;
 	this->publicKey = localPublicKey;
 
-	std::ofstream privateKeyFile(this->PRIVATE_KEY_FILE_NAME, std::ios::binary);
-	this->privateKey.Save(FileSink(privateKeyFile).Ref());
-	privateKeyFile.close();
-
-	std::ofstream publicKeyFile(this->PUBLIC_KEY_FILE_NAME, std::ios::binary);
-	this->publicKey.Save(FileSink(publicKeyFile).Ref());
-	publicKeyFile.close();
+	this->storeKeys();
 }

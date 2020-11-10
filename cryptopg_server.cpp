@@ -36,17 +36,21 @@ public:
 	}
 	Status GetPKCS8PublicKey(ServerContext *context, const Dummy *request, PublicKey *response) override
 	{
-//		std::string responseKey("100100");
 		response->set_pkcs8publickey(this->publicKey);
 		return Status::OK;
 	}
+	Status Sign(::grpc::ServerContext *context, const ::cryptopg::Data *request, ::cryptopg::Data *response) override
+	{
+		std::string signedMessage = keyManager.sign(request->data());
+		response->set_data(signedMessage);
+		return Status::OK;
+	}
+
+
+
 
 	virtual ~CryptoPGServiceImpl()
 	{
-//		if (keyManager) {
-//			std::cout <<"Deleting key manager" << std::endl;
-//			keyManager.reset();
-//		}
 	}
 };
 

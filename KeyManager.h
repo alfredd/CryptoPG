@@ -11,15 +11,16 @@ class KeyManager
 public:
 	KeyManager();
 	virtual ~KeyManager();
-	char* sign(char* data, int len);
-	bool validate(char* signedData);
+	std::string sign(std::string message);
 	std::string getPublicKey();
 
 private:
-	void loadKeys();
+	void storeKeys();
+	void createNewPrivateKey();
+
 	const std::string PUBLIC_KEY_FILE_NAME = "Key.pub";
 	const std::string PRIVATE_KEY_FILE_NAME = "Key.priv";
-	void createNewPrivateKey();
+
 	CryptoPP::DSA::PrivateKey privateKey;
 	CryptoPP::DSA::PublicKey publicKey;
 };

@@ -10,6 +10,7 @@ package cryptopg;
 
 service CryptoPG {
     rpc GetPKCS8PublicKey (Dummy) returns (PublicKey) ;
+    rpc Sign (Data) returns (Data);
 }
 
 message Dummy {
@@ -17,4 +18,10 @@ message Dummy {
 }
 message PublicKey {
     bytes pkcs8PublicKey = 1;
+}
+
+message Data {
+    bytes data = 1;
+    /*bool isSigned = 2;
+    bytes signature = 3;*/
 }
