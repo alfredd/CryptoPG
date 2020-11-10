@@ -7,22 +7,22 @@
 #include "../Verifier.hpp"
 #include <cstdio>
 
-TEST(KeyManager, Test1) {
-	EXPECT_EQ(1,1);
-}
 
-/*TEST(KeyManager, Test2) {
-	KeyManager keyManager;
-	std::string publicKey = keyManager.getPublicKey();
-	EXPECT_TRUE(publicKey.size()!=0);
-}*/
 
 void cleanup_files() {
 	std::remove("Key.priv");
 	std::remove("Key.pub");
 }
 
-TEST(KeyManager, Test3) {
+TEST(KeyManager, Test2) {
+	cleanup_files();
+	KeyManager keyManager;
+	std::string publicKey = keyManager.getPublicKey();
+	EXPECT_TRUE(publicKey.size()!=0);
+	cleanup_files();
+}
+
+TEST(KeyManager, MultipleInstancesOfKeyManagerUseSameKeysFromFile) {
 	cleanup_files();
 
 	KeyManager keyManager1;
@@ -36,7 +36,7 @@ TEST(KeyManager, Test3) {
 
 }
 
-TEST(DigitalSignature, Test4)
+TEST(DigitalSignature, SignatureVerification)
 {
 	cleanup_files();
 
@@ -50,6 +50,27 @@ TEST(DigitalSignature, Test4)
 	bool result = verifier.verify(message,signedMessage, publicKey1);
 
 	EXPECT_TRUE(result);
+
+	cleanup_files();
+}
+
+TEST(DigitalSignature, FailureTesting)
+{
+	cleanup_files();
+
+	KeyManager keyManager1;
+	std::string publicKey1 = keyManager1.getPublicKey();
+
+	std::string message = "Random Message";
+	std::string signedMessage = keyManager1.sign(message);
+
+	cleanup_files();
+	KeyManager keyManager2;
+	publicKey1 = keyManager2.getPublicKey();
+	cryptopg::Verifier verifier;
+	bool result = verifier.verify(message,signedMessage, publicKey1);
+
+	EXPECT_FALSE(result);
 
 	cleanup_files();
 }
