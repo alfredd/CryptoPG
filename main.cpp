@@ -9,9 +9,24 @@
 #include "cryptopp/base64.h"
 
 using namespace CryptoPP;
+
+
 void keyValidation(const std::string &encodedPrivateKey, const std::string &validationKey)
 {
-	if (validationKey == encodedPrivateKey) {
+	const auto encodedPrivateKeySize = encodedPrivateKey.size();
+	const auto validationKeySize = validationKey.size();
+	bool sameSize = encodedPrivateKeySize == validationKeySize;
+	bool equal = true;
+	if (sameSize) {
+		for (int i = 0; i < encodedPrivateKeySize; ++i) {
+			if (encodedPrivateKey.data()[i] != validationKey.data()[i]) {
+				equal = false;
+				break;
+			}
+
+		}
+	}
+	if (sameSize && equal) {
 		std::cout << "Decoded private key is the same as the encoded private key." << std::endl;
 	}
 	else {
@@ -54,6 +69,7 @@ void generate_dsa()
 	privateKey.Save(base64Encoder);
 	std::cout << base64EncodedString << std::endl;
 
+	/*
 	Base64Decoder base64Decoder;
 	base64Decoder.Put((byte *)base64EncodedString.data(), base64EncodedString.size());
 	base64Decoder.MessageEnd();
@@ -66,6 +82,18 @@ void generate_dsa()
 		base64Decoder.Get((byte*)base64DecodedString.data(), base64DecodedString.size());
 		keyValidation(encodedPrivateKey, base64DecodedString);
 	}
+	*/
+
+	std::string base64DecodedString;
+	StringSource stringSource(base64EncodedString, true,
+							  new Base64Decoder(
+								  new StringSink(base64DecodedString)
+							  )
+	);
+	DSA::PrivateKey decodedPrivateKey2;
+	decodedPrivateKey2.Load(StringStore(base64DecodedString).Ref());
+	decodedPrivateKey2.Save(StringSink(validationKey).Ref());
+	keyValidation(encodedPrivateKey, validationKey);
 /*
 
 	DSA::PrivateKey decodedB64PrivateKey;
@@ -78,9 +106,30 @@ void generate_dsa()
 
 }
 
+/**
+ * From https://www.cryptopp.com/wiki/Base64Decoder
+ */
+void exampleCode()
+{
+	std::string encoded = "/+7dzLuqmYh3ZlVEMyIRAA==";
+	std::string decoded;
+
+	Base64Decoder decoder;
+	decoder.Put((byte *)encoded.data(), encoded.size());
+	decoder.MessageEnd();
+
+	word64 size = decoder.MaxRetrievable();
+	if (size && size <= SIZE_MAX) {
+		decoded.resize(size);
+		decoder.Get((byte *)&decoded[0], decoded.size());
+	}
+
+}
+
 int main()
 {
 	std::cout << "Hello, World!" << std::endl;
 	generate_dsa();
+//	exampleCode();
 	return 0;
 }
