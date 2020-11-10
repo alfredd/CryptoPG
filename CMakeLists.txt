@@ -34,6 +34,9 @@ target_link_libraries(cserver gRPC::grpc++ cryptopp)
 
 add_executable(file_demo file_demo.cpp)
 
+add_executable(cclient cryptopg_client.cpp cryptopg.grpc.pb.cc cryptopg.pb.cc)
+target_link_libraries(cclient gRPC::grpc++ cryptopp)
+
 add_subdirectory(tests)
 
 

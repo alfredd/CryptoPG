@@ -31,12 +31,13 @@ public:
 			std::cout<< "No public key found" << std::endl;
 		}
 		this->publicKey = publicKey;
+		std::cout << "Size of public key is " << this->publicKey.size() << " bytes" << std::endl;
 
 	}
 	Status GetPKCS8PublicKey(ServerContext *context, const Dummy *request, PublicKey *response) override
 	{
-		std::string responseKey("100100");
-		response->set_pkcs8publickey(responseKey);
+//		std::string responseKey("100100");
+		response->set_pkcs8publickey(this->publicKey);
 		return Status::OK;
 	}
 
